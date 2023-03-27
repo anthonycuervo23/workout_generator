@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
+import 'package:workout_generator_ai/workout_response.dart';
 
 class WorkoutGenerator extends StatefulWidget {
   const WorkoutGenerator({super.key});
@@ -19,7 +20,7 @@ class _WorkoutGeneratorState extends State<WorkoutGenerator> {
   String fitnessLevel = 'Beginner';
   bool isLoading = false;
   bool isSubmitted = false;
-  WorkoutPlan? workoutPlan;
+  WorkoutResponse? workoutPlan;
 
   // Define a function to handle the form submission
   Future<void> submitForm() async {
@@ -46,7 +47,7 @@ class _WorkoutGeneratorState extends State<WorkoutGenerator> {
       );
 
       // Parse the response and create a WorkoutPlan object
-      final workoutPlan = WorkoutPlan.fromJson(jsonDecode(response.body));
+      final workoutPlan = WorkoutResponse.fromJson(response.body);
 
       // Show the workout plan on the screen
       setState(() {
@@ -86,13 +87,7 @@ class _WorkoutGeneratorState extends State<WorkoutGenerator> {
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),
-              const SizedBox(
-                height: 16,
-              ),
-              const Text(
-                'Duration',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              const Subtitle(text: 'Duration'),
               SliderTheme(
                 data: const SliderThemeData(
                   valueIndicatorShape: PaddleSliderValueIndicatorShape(),
@@ -115,12 +110,7 @@ class _WorkoutGeneratorState extends State<WorkoutGenerator> {
                   inactiveColor: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 16.0),
-              const Text(
-                'Fitness Goal',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16.0),
+              const Subtitle(text: 'Fitness Goal'),
               CupertinoSlidingSegmentedControl(
                 groupValue: fitnessGoal,
                 // ignore: prefer_const_literals_to_create_immutables
@@ -155,12 +145,7 @@ class _WorkoutGeneratorState extends State<WorkoutGenerator> {
                   });
                 },
               ),
-              const SizedBox(height: 16.0),
-              const Text(
-                'Target Area',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16.0),
+              const Subtitle(text: 'Target Area'),
               CupertinoSlidingSegmentedControl(
                 groupValue: targetArea,
                 // ignore: prefer_const_literals_to_create_immutables
@@ -192,12 +177,7 @@ class _WorkoutGeneratorState extends State<WorkoutGenerator> {
                   });
                 },
               ),
-              const SizedBox(height: 16.0),
-              const Text(
-                'Fitness Experience',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16.0),
+              const Subtitle(text: 'Fitness Experience'),
               CupertinoSlidingSegmentedControl(
                 groupValue: fitnessLevel,
                 // ignore: prefer_const_literals_to_create_immutables
@@ -320,114 +300,21 @@ class _WorkoutGeneratorState extends State<WorkoutGenerator> {
   }
 }
 
-class WorkoutPlan {
-  String? id;
-  String? object;
-  int? created;
-  String? model;
-  Usage? usage;
-  List<Choices>? choices;
+class Subtitle extends StatelessWidget {
+  final String text;
+  const Subtitle({super.key, required this.text});
 
-  WorkoutPlan(
-      {this.id,
-      this.object,
-      this.created,
-      this.model,
-      this.usage,
-      this.choices});
-
-  WorkoutPlan.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    object = json['object'];
-    created = json['created'];
-    model = json['model'];
-    usage = json['usage'] != null ? Usage.fromJson(json['usage']) : null;
-    if (json['choices'] != null) {
-      choices = <Choices>[];
-      json['choices'].forEach((v) {
-        choices!.add(Choices.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['object'] = object;
-    data['created'] = created;
-    data['model'] = model;
-    if (usage != null) {
-      data['usage'] = usage!.toJson();
-    }
-    if (choices != null) {
-      data['choices'] = choices!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class Usage {
-  int? promptTokens;
-  int? completionTokens;
-  int? totalTokens;
-
-  Usage({this.promptTokens, this.completionTokens, this.totalTokens});
-
-  Usage.fromJson(Map<String, dynamic> json) {
-    promptTokens = json['prompt_tokens'];
-    completionTokens = json['completion_tokens'];
-    totalTokens = json['total_tokens'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['prompt_tokens'] = promptTokens;
-    data['completion_tokens'] = completionTokens;
-    data['total_tokens'] = totalTokens;
-    return data;
-  }
-}
-
-class Choices {
-  Message? message;
-  String? finishReason;
-  int? index;
-
-  Choices({this.message, this.finishReason, this.index});
-
-  Choices.fromJson(Map<String, dynamic> json) {
-    message =
-        json['message'] != null ? Message.fromJson(json['message']) : null;
-    finishReason = json['finish_reason'];
-    index = json['index'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (message != null) {
-      data['message'] = message!.toJson();
-    }
-    data['finish_reason'] = finishReason;
-    data['index'] = index;
-    return data;
-  }
-}
-
-class Message {
-  String? role;
-  String? content;
-
-  Message({this.role, this.content});
-
-  Message.fromJson(Map<String, dynamic> json) {
-    role = json['role'];
-    content = json['content'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['role'] = role;
-    data['content'] = content;
-    return data;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 16.0),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16.0),
+      ],
+    );
   }
 }
